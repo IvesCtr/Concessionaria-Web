@@ -13,17 +13,17 @@ Um projeto Full-Stack completo construído com Nest.js e Next.js para gerir as o
 - [Visão Geral da API](#visão-geral-da-api)
 
 ## Visão Geral
-Esta aplicação simula um sistema real onde diferentes tipos de utilizadores (Clientes, Funcionários e Gerentes) podem interagir com a plataforma de acordo com as suas permissões. Gerentes têm controlo total, funcionários podem gerir veículos e vendas, e clientes podem visualizar o catálogo.
+Esta aplicação simula um sistema real onde diferentes tipos de utilizadores (Clientes, Funcionários e Gerentes) podem interagir com a plataforma de acordo com as suas permissões. Gerentes têm controle total, funcionários podem gerir veículos e vendas, e clientes podem visualizar o catálogo.
 
 ## Funcionalidades
 - 🔐 **Autenticação e Autorização:** Sistema de login seguro com Tokens JWT com tempo de expiração configurável.
-- 👤 **Controlo de Acesso Baseado em Funções (RBAC):**
+- 👤 **Controle de Acesso Baseado em Funções (RBAC):**
   - **Gerente:** Acesso total, incluindo gestão de funcionários.
-  - **Funcionário:** Gestão de veículos, clientes e registo de vendas.
+  - **Funcionário:** Gestão de veículos, clientes e registro de vendas.
   - **Cliente:** Acesso de visualização ao catálogo (funcionalidade a ser expandida).
 - 🚗 **CRUD de Veículos:** Criação, leitura, atualização e exclusão de veículos no catálogo.
 - 🧑‍🤝‍🧑 **CRUD de Utilizadores:** Gestão de Clientes e Funcionários.
-- 📈 **CRUD de Vendas:** Registo e visualização de histórico de vendas.
+- 📈 **CRUD de Vendas:** Registro e visualização de histórico de vendas.
 
 ## Stack de Tecnologias
 
@@ -57,8 +57,8 @@ Siga estes passos para configurar o ambiente de desenvolvimento local.
 
 **1. Clone o Repositório**
 ```bash
-git clone <URL_DO_SEU_REPOSITORIO>
-cd concessionaria-mongo-app
+git clone https://github.com/IvesCtr/Concessionaria-Web.git
+cd Concessionaria-Web
 ```
 
 **2. Configure o Backend**
@@ -167,4 +167,36 @@ npm run dev
 | `GET`  | `/veiculos`             | Lista todos os veículos.                  | Sim (Bearer Token)     | Qualquer utilizador logado |
 | `POST` | `/veiculos`             | Adiciona um novo veículo.                 | Sim (Bearer Token)     | Funcionário             |
 | `POST` | `/sales`                | Regista uma nova venda.                   | Sim (Bearer Token)     | Funcionário             |
+
+## Testando a API com o Postman
+
+Para testar os endpoints protegidos, siga este fluxo:
+
+**Passo 1: Fazer Login para Obter o Token**
+
+Use as credenciais do gerente para obter um token de acesso.
+
+1.  **No Postman**, faça a seguinte requisição:
+    - **Método:** `POST`
+    - **URL:** `http://localhost:7654/auth/login`
+    - **Body** > **raw** > **JSON**:
+      ```json
+      {
+          "email": "gerente@concessionaria.com",
+          "password": "senhaforte123"
+      }
+      ```
+2.  A resposta conterá um `access_token`. **Copie o valor completo deste token.**
+
+**Passo 2: Acessar uma Rota Protegida**
+
+Agora, use o token para aceder a um endpoint que requer autenticação, como a listagem de funcionários.
+
+1.  **No Postman**, faça a seguinte requisição:
+    - **Método:** `GET`
+    - **URL:** `http://localhost:7654/funcionarios`
+    - Vá para a aba **Authorization**.
+    - **Type:** Selecione `Bearer Token`.
+    - **Token:** Cole o `access_token` que copiou no passo anterior.
+2.  Clique em "Send". A API deverá retornar a lista de funcionários.
 
