@@ -1,4 +1,3 @@
-// /server/src/vehicles/schemas/vehicle.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
