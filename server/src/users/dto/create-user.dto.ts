@@ -1,4 +1,4 @@
-import { IsEmail, IsString, IsNotEmpty, MinLength, IsEnum } from 'class-validator';
+import { IsEmail, IsString, IsNotEmpty, MinLength, IsEnum, Matches } from 'class-validator';
 import { UserRole } from '../enums/user-role.enum';
 
 export class CreateUserDto {
@@ -15,4 +15,10 @@ export class CreateUserDto {
 
   @IsEnum(UserRole)
   role: UserRole;
+
+  @IsString()
+  @Matches(/^\d{11}$/, {
+    message: 'O CPF deve conter exatamente 11 dígitos numéricos (apenas números).',
+  })
+  cpf: string;
 }

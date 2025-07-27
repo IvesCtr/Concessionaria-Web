@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsEnum, isNotEmpty, IsNotEmpty, IsNumber, IsPositive, isString, IsString } from 'class-validator';
 import { VehicleStatus } from '../schemas/vehicle.schema';
 
 export class CreateVehicleDto {
