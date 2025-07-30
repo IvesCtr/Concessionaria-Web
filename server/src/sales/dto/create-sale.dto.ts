@@ -1,18 +1,16 @@
-// /server/src/sales/dto/create-sale.dto.ts
-import { IsNumber, IsPositive } from 'class-validator';
+import { IsMongoId, IsNumber, IsPositive, IsString, Matches } from 'class-validator';
 
 export class CreateSaleDto {
-  @IsNumber()
-  @IsPositive()
-  vehicleId: number;
+  @IsMongoId({ message: 'O ID do veículo é inválido.' })
+  vehicleId: string;
 
-  @IsNumber()
-  @IsPositive()
-  clienteId: number;
+  @IsString()
+  @Matches(/^\d{11}$/, { message: 'O CPF do cliente deve conter exatamente 11 dígitos numéricos.' })
+  clienteCpf: string;
 
-  @IsNumber()
-  @IsPositive()
-  funcionarioId: number;
+  @IsString()
+  @Matches(/^\d{11}$/, { message: 'O CPF do funcionário deve conter exatamente 11 dígitos numéricos.' })
+  funcionarioCpf: string;
 
   @IsNumber()
   @IsPositive()

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, ValidationP
 import { RolesGuard } from '../auth/guards/roles.guard'; // Adjust the path if necessary
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; 
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
+import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehiclesService } from './vehicles.service';
 
 
@@ -26,9 +27,14 @@ export class VehiclesController {
         return this.vehiclesService.create(createVehicleDto);
     }
 
-    @UseGuards(RolesGuard)
     @Delete(':id')
     remove(@Param('id') id: string) {
         return this.vehiclesService.remove(id);
+    }
+
+    @UseGuards(RolesGuard)
+    @Put(':id')
+    update(@Param('id') id: string, @Body(ValidationPipe) updateVehicleDto: UpdateVehicleDto) {
+        return this.vehiclesService.update(id, updateVehicleDto);
     }
 }

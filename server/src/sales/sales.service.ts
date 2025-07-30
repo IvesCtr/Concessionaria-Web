@@ -16,15 +16,61 @@ export class SalesService {
   ) {}
 
   async create(createSaleDto: CreateSaleDto): Promise<Sale> {
-    const { vehicleId, clienteId, funcionarioId } = createSaleDto;
+    const { vehicleId, clienteCpf, funcionarioCpf, finalPrice } = createSaleDto;
 
-    const vehicle = await this.vehicleModel.findById(vehicleId).exec();
-    if (!vehicle || vehicle.status === VehicleStatus.VENDIDO) {
-      throw new BadRequestException('Veículo inválido ou já vendido.');
+    const vehicle = await this.vehicleModel.findById(vehicleId);
+    if (!vehicle) {
+      throw new NotFoundException(`Veículo com ID #${vehicleId} não encontrado.`);
+    }
+    if (vehicle.status === VehicleStatus.VENDIDO) {
+      throw new BadRequestException(`Veículo com ID #${vehicleId} já foi vendido.`);
     }
 
-    const createdSale = new this.saleModel(createSaleDto);
-    await this.vehicleModel.updateOne({ _id: vehicleId }, { status: VehicleStatus.VENDIDO }).exec();
-    return createdSale.save();
+    const cliente = await this.userModel.findOne({ cpf: clienteCpf, role: UserRole.CLIENTE });
+    if (!cliente) {
+      throw new NotFoundException(`Cliente com CPF #${clienteCpf} não encontrado.`);
+    }
+
+    const funcionario = await this.userModel.findOne({ cpf: funcionarioCpf, role: { $in: [UserRole.FUNCIONARIO, UserRole.GERENTE] } });
+    if (!funcionario) {
+      throw new NotFoundException(`Funcionário com CPF #${funcionarioCpf} não encontrado.`);
+    }
+    
+    const createdSale = new this.saleModel({
+      vehicle: vehicleId,
+      cliente: cliente._id,
+      funcionario: funcionario._id,
+      finalPrice,
+    });
+    
+    await this.vehicleModel.updateOne({ _id: vehicleId }, { status: VehicleStatus.VENDIDO });
+
+    const savedSale = await createdSale.save();
+    return this.findById(savedSale.id);
+  }
+  
+  findAll(): Promise<Sale[]> {
+    return this.saleModel
+      .find()
+      .populate('vehicle', 'marca modelo')
+      .populate('cliente', 'name')
+      .populate('funcionario', 'name')
+      .sort({ saleDate: 'desc' })
+      .exec();
+  }
+
+  async findById(id: string): Promise<Sale> {
+    const sale = await this.saleModel
+      .findById(id)
+      .populate('vehicle', 'marca modelo')
+      .populate('cliente', 'name')
+      .populate('funcionario', 'name')
+      .exec();
+
+    if (!sale) {
+      throw new NotFoundException(`Venda com ID #${id} não encontrada.`);
+    }
+    
+    return sale;
   }
 }

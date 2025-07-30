@@ -31,10 +31,14 @@ export class VehiclesService {
     }
 
     async update(id: string, updateVehicleDto: UpdateVehicleDto): Promise<Vehicle> {
-        const existingVehicle = await this.vehicleModel.findByIdAndUpdate(id, updateVehicleDto).exec();
+        const existingVehicle = await this.vehicleModel
+            .findByIdAndUpdate(id, updateVehicleDto, { new: true })
+            .exec();
+            
         if (!existingVehicle) {
             throw new NotFoundException(`Veículo com ID #${id} não encontrado`);
         }
+        
         return existingVehicle;
     }
 
