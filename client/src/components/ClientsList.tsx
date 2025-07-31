@@ -1,10 +1,10 @@
-// client/src/components/ClientsList.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { User } from '@/types';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react'; // Ícones modernos
+import { PlusCircle, Edit, Trash2, Save, XCircle } from 'lucide-react';
+import { ClientFormModal } from './ClientFormModal'; // Importa o novo modal
 
 export function ClientsList() {
   const { token } = useAuth();
@@ -12,23 +12,28 @@ export function ClientsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!token) return;
+  // Estados para as novas funcionalidades
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingClientId, setEditingClientId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<User>>({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof User; direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
 
+  // Busca inicial dos dados
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    };
+    
     const fetchClients = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await fetch('http://localhost:7654/clientes', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: { 'Authorization': `Bearer ${token}` },
         });
-
-        if (!response.ok) {
-          throw new Error('Falha ao buscar os clientes.');
-        }
-
+        if (!response.ok) throw new Error('Falha ao buscar os clientes. Verifique as suas permissões.');
         const data: User[] = await response.json();
         setClients(data);
       } catch (err: any) {
@@ -37,108 +42,189 @@ export function ClientsList() {
         setLoading(false);
       }
     };
-
     fetchClients();
   }, [token]);
 
-  const handleDelete = async (clientId: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.')) {
-      return;
+  // Lógica de Pesquisa e Ordenação
+  const filteredAndSortedClients = useMemo(() => {
+    let sortedClients = [...clients];
+
+    if (sortConfig.key) {
+      sortedClients.sort((a, b) => {
+        const valA = a[sortConfig.key] || '';
+        const valB = b[sortConfig.key] || '';
+        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
     }
 
+    if (!searchTerm) {
+      return sortedClients;
+    }
+
+    return sortedClients.filter(client =>
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.cpf.includes(searchTerm)
+    );
+  }, [clients, searchTerm, sortConfig]);
+
+  const requestSort = (key: keyof User) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Funções de CRUD
+  const handleSaveNewClient = async (newClientData: Omit<User, 'id' | 'role'>) => {
+    if (!token) throw new Error("Autenticação necessária.");
+    
+    const response = await fetch('http://localhost:7654/clientes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(newClientData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Falha ao criar o cliente.');
+    }
+
+    const createdClient: User = await response.json();
+    setClients(prevClients => [createdClient, ...prevClients]);
+  };
+
+  const handleEdit = (client: User) => {
+    setEditingClientId(client.id);
+    setEditFormData({ name: client.name, email: client.email, cpf: client.cpf });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingClientId(null);
+    setEditFormData({});
+  };
+
+  const handleSaveEdit = async (clientId: string) => {
+    if (!token) return;
+    try {
+      const response = await fetch(`http://localhost:7654/clientes/${clientId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (!response.ok) throw new Error('Falha ao atualizar o cliente.');
+      
+      const updatedClient: User = await response.json();
+      setClients(clients.map(c => c.id === clientId ? updatedClient : c));
+      handleCancelEdit(); // Sai do modo de edição
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleDelete = async (clientId: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este cliente?')) return;
     try {
       const response = await fetch(`http://localhost:7654/clientes/${clientId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-
-      if (!response.ok) {
-        throw new Error('Falha ao excluir o cliente.');
-      }
-
-      // Remove o cliente da lista local para atualizar a UI instantaneamente
-      setClients(clients.filter(client => client.id !== clientId));
-      alert('Cliente excluído com sucesso!');
-
+      if (!response.ok) throw new Error('Falha ao excluir o cliente.');
+      setClients(clients.filter(c => c.id !== clientId));
     } catch (err: any) {
       setError(err.message);
-      alert(`Erro: ${err.message}`);
     }
   };
-  
-  const formatCPF = (cpf: string) => {
+
+  const formatCPF = (cpf: string): string => {
+    if (!cpf) return '';
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
-  if (loading) {
-    return <p className="text-center text-gray-500">Carregando clientes...</p>;
-  }
-
-  if (error) {
-    return <p className="text-center text-red-500">Erro: {error}</p>;
-  }
+  if (loading) return <p className="text-center text-gray-500">A carregar...</p>;
+  if (error) return <p className="text-center text-red-500">Erro: {error}</p>;
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-      {/* Cabeçalho com Busca e Ordenação (Fase 2) */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <div className="w-full sm:w-1/2">
-          <label htmlFor="search" className="text-sm font-medium text-gray-600">Pesquisar</label>
-          <input id="search" type="text" placeholder="Nome, CPF ou Email..." className="mt-1 w-full p-2 border rounded-md bg-gray-100 cursor-not-allowed" disabled />
+    <>
+      <ClientFormModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveNewClient}
+      />
+      <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+        {/* Barra de Pesquisa e Ordenação */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 text-gray-700">
+          <input 
+            type="text" 
+            placeholder="Pesquisar por nome, CPF ou email..." 
+            className="w-full p-2 border rounded-md"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <div className="w-full sm:w-auto">
-          <label htmlFor="sort" className="text-sm font-medium text-gray-600">Ordenar por</label>
-          <select id="sort" className="mt-1 w-full p-2 border rounded-md bg-gray-100 cursor-not-allowed" disabled>
-            <option>Nome</option>
-          </select>
-        </div>
-      </div>
 
-      {/* Tabela de Clientes */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-700 text-white">
-            <tr>
-              <th scope="col" className="w-20 text-center py-3">
-                <button className="p-2 rounded-md hover:bg-gray-600 transition-colors">
-                  <PlusCircle size={24} />
-                </button>
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Nome</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">CPF</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Email</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {clients.map((client) => (
-              <tr key={client.id} className="hover:bg-gray-50">
-                <td className="py-4 whitespace-nowrap"></td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{client.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCPF(client.cpf)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{client.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex items-center gap-4">
-                    <button className="text-blue-600 hover:text-blue-900">
-                      <Edit size={20} />
-                    </button>
-                    <button onClick={() => handleDelete(client.id)} className="text-red-600 hover:text-red-900">
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
-                </td>
+        {/* Tabela de Clientes */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-blue-100 text-white">
+              <tr>
+                <th className="w-20 text-center py-3">
+                  <button onClick={() => setIsModalOpen(true)} className="text-gray-700 p-2 rounded-md hover:bg-blue-300">
+                    <PlusCircle size={24} />
+                  </button>
+                </th>
+                <th onClick={() => requestSort('name')} className="text-gray-700 cursor-pointer px-6 py-3 text-left text-xs font-large uppercase tracking-wider">Nome</th>
+                <th onClick={() => requestSort('cpf')} className="text-gray-700 cursor-pointer px-6 py-3 text-left text-xs font-large uppercase tracking-wider">CPF</th>
+                <th onClick={() => requestSort('email')} className="text-gray-700 cursor-pointer px-6 py-3 text-left text-xs font-large uppercase tracking-wider">Email</th>
+                <th className="text-gray-700 px-6 py-3 text-left text-xs font-large uppercase tracking-wider">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredAndSortedClients.map((client) => (
+                <tr key={client.id} className="hover:bg-gray-50">
+                  <td className="py-4 whitespace-nowrap "></td>
+                  {editingClientId === client.id ? (
+                    <>
+                      <td className="px-6 py-4"><input value={editFormData.name} onChange={(e) => setEditFormData({...editFormData, name: e.target.value})} className="w-full p-2 border rounded-md text-gray-700" /></td>
+                      <td className="px-6 py-4"><input value={editFormData.cpf} onChange={(e) => setEditFormData({...editFormData, cpf: e.target.value})} className="w-full p-2 border rounded-md text-gray-700" /></td>
+                      <td className="px-6 py-4"><input value={editFormData.email} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} className="w-full p-2 border rounded-md text-gray-700" /></td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{client.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCPF(client.cpf)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{client.email}</td>
+                    </>
+                  )}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-4">
+                      {editingClientId === client.id ? (
+                        <>
+                          <button onClick={() => handleSaveEdit(client.id)} className="text-green-600 hover:text-green-800"><Save size={20} /></button>
+                          <button onClick={handleCancelEdit} className="text-gray-600 hover:text-gray-800"><XCircle size={20} /></button>
+                        </>
+                      ) : (
+                        <button onClick={() => handleEdit(client)} className="text-blue-600 hover:text-blue-800"><Edit size={20} /></button>
+                      )}
+                      <button onClick={() => handleDelete(client.id)} className="text-red-600 hover:text-red-800"><Trash2 size={20} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      
-      {/* Paginação (Fase 2) */}
-      <div className="flex items-center justify-center border-t border-gray-200 px-4 py-3 sm:px-6 mt-4">
-        <p className="text-sm text-gray-500">Paginação será implementada na Fase 2</p>
-      </div>
-    </div>
+    </>
   );
 }
