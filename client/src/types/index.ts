@@ -8,3 +8,11 @@ export type Vehicle = {
   imagemUrl?: string; 
   vendido: boolean;
 };
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  cpf: string;
+  role: 'cliente' | 'funcionario' | 'gerente';
+};
