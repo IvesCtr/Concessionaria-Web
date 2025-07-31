@@ -3,39 +3,43 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode'; // Precisaremos instalar essa biblioteca
+import { jwtDecode } from 'jwt-decode';
 
-// Interface para os dados do usuário extraídos do token
 interface User {
   email: string;
   sub: string; // ID do usuário
   role: string;
 }
 
-// Interface para o valor do nosso contexto
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  isLoading: boolean;
   login: (accessToken: string) => void;
   logout: () => void;
 }
 
-// Criando o contexto com um valor padrão
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// O Provedor do Contexto
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Efeito para carregar o token do localStorage ao iniciar
   useEffect(() => {
-    const storedToken = localStorage.getItem('accessToken');
-    if (storedToken) {
-      const decodedUser: User = jwtDecode(storedToken);
-      setUser(decodedUser);
-      setToken(storedToken);
+    try {
+      const storedToken = localStorage.getItem('accessToken');
+      if (storedToken) {
+        const decodedUser: User = jwtDecode(storedToken);
+        setUser(decodedUser);
+        setToken(storedToken);
+      }
+    } catch (error) {
+      console.error("Falha ao decodificar o token:", error);
+      localStorage.removeItem('accessToken');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -44,24 +48,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('accessToken', accessToken);
     setUser(decodedUser);
     setToken(accessToken);
-    router.push('/dashboard'); // Redireciona para um painel após o login
+    // REMOVEMOS O REDIRECIONAMENTO DAQUI.
+    // A página de Login agora será responsável por redirecionar
+    // ao perceber que o estado 'user' mudou.
   };
 
   const logout = () => {
     localStorage.removeItem('accessToken');
     setUser(null);
     setToken(null);
-    router.push('/login'); // Redireciona para a página de login após o logout
+    router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Hook customizado para facilitar o uso do contexto
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

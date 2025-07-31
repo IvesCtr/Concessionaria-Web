@@ -16,3 +16,19 @@ export type User = {
   cpf: string;
   role: 'cliente' | 'funcionario' | 'gerente';
 };
+
+export type Sale = {
+  id: string;
+  finalPrice: number;
+  saleDate: string;
+  vehicle: {
+    marca: string;
+    modelo: string;
+  };
+  cliente: {
+    name: string;
+  };
+  funcionario: {
+    name: string;
+  };
+};

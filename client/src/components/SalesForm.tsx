@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // Passo 1: Importar o useRouter
 import { useAuth } from '@/context/AuthContext';
 
 // Interfaces para os dados que vamos buscar
@@ -14,6 +15,7 @@ interface ClientDetails {
 }
 
 export function SalesForm() {
+  const router = useRouter(); // Passo 2: Instanciar o router
   const { token } = useAuth();
 
   // --- Estados para os dados do formulário ---
@@ -188,19 +190,20 @@ export function SalesForm() {
         {success && <p className="mt-4 text-center bg-green-100 text-green-700 p-3 rounded">{success}</p>}
         {error && <p className="mt-4 text-center bg-red-100 text-red-700 p-3 rounded">{error}</p>}
         <div className="flex justify-center gap-6 mt-8">
-        <button 
+          <button 
             type="button" 
-            className="bg-red-200 hover:bg-red-300 text-red-800 font-bold py-3 px-25 rounded-lg transition-colors duration-300"
-        >
+            onClick={() => router.push('/dashboard')} // Passo 3: Adicionar o onClick
+            className="bg-red-200 hover:bg-red-300 text-red-800 font-bold py-3 px-24 rounded-lg transition-colors duration-300" // Passo 4: Corrigir px-25 para px-24
+          >
             Cancelar
-        </button>
-        <button 
+          </button>
+          <button 
             type="submit" 
-            className="bg-green-200 hover:bg-green-300 text-green-800 font-bold py-3 px-25 rounded-lg transition-colors duration-300" 
+            className="bg-green-200 hover:bg-green-300 text-green-800 font-bold py-3 px-24 rounded-lg transition-colors duration-300" // Passo 4: Corrigir px-25 para px-24
             disabled={loading}
-        >
+          >
             {loading ? 'Registrando...' : 'Concluído'}
-        </button>
+          </button>
         </div>
       </form>
     </div>
