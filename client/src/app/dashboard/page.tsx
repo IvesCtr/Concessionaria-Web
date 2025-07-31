@@ -69,7 +69,7 @@ export default async function DashboardPage() {
             <QuickLink href="/clientes" title="Gerir Clientes" description="Ver e atualizar a lista de clientes." />
             <QuickLink href="/historico" title="Histórico de Vendas" description="Consultar o histórico completo de vendas." />
             {user.role === 'gerente' && (
-              <QuickLink href="/funcionarios" title="Funcionários" description="Ver e atualizar a lista de funcionários" />
+              <QuickLink href="/funcionarios" title="Funcionários" description="Ver e atualizar a lista de funcionários." />
             )}
           </div>
         </section>
