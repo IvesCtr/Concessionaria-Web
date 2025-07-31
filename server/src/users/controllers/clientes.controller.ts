@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator'; 
 import { UserRole } from '../enums/user-role.enum';
+import { NotFoundException } from '@nestjs/common';
 
 @Controller('clientes')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,5 +44,21 @@ export class ClientesController {
   @Roles(UserRole.GERENTE)
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  // Adicione esta rota dentro da classe ClientesController
+
+  @Get('cpf/:cpf')
+  @Roles(UserRole.FUNCIONARIO, UserRole.GERENTE)
+  async findOneByCpf(@Param('cpf') cpf: string) {
+    const user = await this.usersService.findOneByCpf(cpf);
+    if (!user) {
+      throw new NotFoundException(`Cliente com CPF #${cpf} não encontrado.`);
+    }
+    // Garante que apenas clientes sejam retornados por este endpoint
+    if (user.role !== UserRole.CLIENTE) {
+      throw new NotFoundException(`Nenhum cliente encontrado com o CPF #${cpf}.`);
+    }
+    return user;
   }
 }

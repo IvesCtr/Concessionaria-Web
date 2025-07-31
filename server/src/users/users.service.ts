@@ -49,4 +49,8 @@ export class UsersService {
       throw new NotFoundException(`Usuário com ID #${id} não encontrado`);
     }
   }
+
+  async findOneByCpf(cpf: string): Promise<User | null> {
+    return this.userModel.findOne({ cpf }).select('-password').exec();
+  }
 }
