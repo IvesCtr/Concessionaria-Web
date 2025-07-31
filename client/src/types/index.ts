@@ -1,3 +1,6 @@
+// client/src/types/index.ts
+
+// Tipo alinhado com o backend (vehicle.schema.ts)
 export type Vehicle = {
   id: string;
   marca: string;
@@ -5,8 +8,7 @@ export type Vehicle = {
   ano: number;
   cor: string;
   preco: number;
-  imagemUrl?: string; 
-  vendido: boolean;
+  status: 'disponivel' | 'vendido';
 };
 
 export type User = {
