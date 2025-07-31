@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, use } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { User } from '@/types';
 import { PlusCircle, Edit, Trash2, Save, XCircle } from 'lucide-react';
 import { ClientFormModal } from './ClientFormModal'; // Importa o novo modal
 
 export function ClientsList() {
-  const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
+  const { token } = useAuth();
   const [clients, setClients] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

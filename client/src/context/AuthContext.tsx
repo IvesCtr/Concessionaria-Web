@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const storedToken = localStorage.getItem('accessToken');
+      const storedToken = localStorage.getItem('token');
       if (storedToken) {
         const decodedUser: User = jwtDecode(storedToken);
         setUser(decodedUser);
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("Falha ao decodificar o token:", error);
-      localStorage.removeItem('accessToken');
+      localStorage.removeItem('token');
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (accessToken: string) => {
     const decodedUser: User = jwtDecode(accessToken);
-    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('token', accessToken);
     setUser(decodedUser);
     setToken(accessToken);
     // REMOVEMOS O REDIRECIONAMENTO DAQUI.
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem('token');
     setUser(null);
     setToken(null);
     router.push('/login');
@@ -74,3 +74,4 @@ export function useAuth() {
   }
   return context;
 }
+

@@ -8,7 +8,7 @@ import { PlusCircle, Edit, Trash2, Save, XCircle } from 'lucide-react';
 import { VehicleFormModal, NewVehiclePayload } from './VehicleFormModal';
 
 export function VehiclesList() {
-  const { token } = useAuth();
+  const token = useAuth();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
