@@ -1,5 +1,6 @@
 import VehicleCard from '@/components/VehicleCard';
 import { Vehicle } from '@/types';
+import Link from 'next/link';
 
 // Função para buscar os dados da sua API backend
 // O Next.js gerencia o cache desta função automaticamente
@@ -33,8 +34,17 @@ console.log('Dados recebidos do backend:', vehicles);
     <main className="bg-gray-50 min-h-screen">
       {/* Aqui podemos adicionar o Header e a Barra de Busca no futuro */}
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Veículos em Destaque</h1>
-        
+        <div className="flex justify-between items-center mb-6">
+          {/* A classe mb-6 foi removida daqui */}
+          <h1 className="text-3xl font-bold text-gray-800">Veículos em Destaque</h1>
+          
+          <Link 
+            href="/login"
+            className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+          >
+            Login de Funcionários
+          </Link>
+        </div>
         {vehicles.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {vehicles.map((vehicle) => (

@@ -3,9 +3,8 @@ export type Vehicle = {
   marca: string;
   modelo: string;
   ano: number;
-  quilometragem: number;
+  cor: string;
   preco: number;
-  descricao?: string;
   imagemUrl?: string; 
   vendido: boolean;
 };

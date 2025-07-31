@@ -16,11 +16,6 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-// Função para formatar a quilometragem
-const formatMileage = (km: number) => {
-    return new Intl.NumberFormat('pt-BR').format(km);
-}
-
 export default function VehicleCard({ vehicle }: VehicleCardProps) {
   return (
     <Link href={`/vehicles/${vehicle.id}`} className="block rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 bg-white">
@@ -35,12 +30,6 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
       </div>
       <div className="p-4">
         <h2 className="text-lg font-bold text-gray-800 truncate">{vehicle.marca.toUpperCase()} {vehicle.modelo.toUpperCase()}</h2>
-        <p className="text-sm text-gray-600 mt-1 truncate">{vehicle.descricao}</p>
-        
-        <div className="flex justify-between text-sm text-gray-500 mt-4">
-          <span>{vehicle.ano}</span>
-          <span>{formatMileage(vehicle.quilometragem)} km</span>
-        </div>
 
         <p className="text-2xl font-extrabold text-gray-900 mt-4">
           {formatPrice(vehicle.preco)}

@@ -20,7 +20,13 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user._id, role: user.role };
+    // A ALTERAÇÃO É AQUI: Adicionamos o 'name' ao payload do token.
+    const payload = { 
+      email: user.email, 
+      sub: user._id, 
+      role: user.role,
+      name: user.name // <-- LINHA ADICIONADA
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };

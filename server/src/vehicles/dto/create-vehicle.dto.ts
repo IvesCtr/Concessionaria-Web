@@ -22,6 +22,10 @@ export class CreateVehicleDto {
   @IsPositive()
   preco: number;
 
+  @IsString()
+  @IsNotEmpty()
+  imagemUrl: string;
+
   @IsEnum(VehicleStatus)
   status?: VehicleStatus;
 }
