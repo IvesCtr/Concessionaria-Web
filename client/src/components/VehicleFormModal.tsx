@@ -45,7 +45,7 @@ export function VehicleFormModal({ isOpen, onClose, onSave }: VehicleFormModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+    <div className="fixed inset-0 bg-white bg-opacity-50 z-50 flex justify-center items-center">
       <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-lg">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Adicionar Novo Veículo</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -18,10 +18,10 @@ const formatPrice = (price: number) => {
 
 export default function VehicleCard({ vehicle }: VehicleCardProps) {
   return (
-    <Link href={`/vehicles/${vehicle.id}`} className="block rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 bg-white">
+    <Link href={`/veiculos/${vehicle.id}`} className="block rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300 bg-white">
       <div className="relative w-full h-48">
         <Image
-          src={vehicle.imagemUrl || '/placeholder-image.png'} // Use uma imagem placeholder se não houver
+          src={vehicle.imagemUrl}
           alt={`${vehicle.marca} ${vehicle.modelo}`}
           fill
           style={{ objectFit: 'cover' }}

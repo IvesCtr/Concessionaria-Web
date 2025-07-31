@@ -68,7 +68,7 @@ export function VehiclesList() {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(newVehicleData),
     });
-
+    debugger;
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Falha ao criar o veículo.');

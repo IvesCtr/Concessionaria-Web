@@ -8,7 +8,8 @@ import {
   DollarSign,
   Users,
   History,
-  UserPlus
+  UserPlus,
+  Home // 1. Importamos o ícone de "Home"
 } from 'lucide-react';
 // Importamos o seu componente LogoutButton
 import { LogoutButton } from '@/components/LogoutButton';
@@ -57,15 +58,21 @@ export default async function DashboardPage() {
       <div className="max-w-7xl mx-auto">
         
         <header className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800">
-              Tela inicial
-            </h1>
-            <p className="text-lg text-gray-500 mt-1">
-              Bem-vindo, <span className="font-bold text-blue-600">{user.name}</span>!
-            </p>
+          {/* 2. Criei um container para o título e o novo botão */}
+          <div className="flex items-center gap-4">
+            {/* 3. Adicionei o botão de voltar para a página inicial */}
+            <Link href="http://localhost:3000/" className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-3 rounded-lg transition-colors">
+              <Home size={24} />
+            </Link>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800">
+                Painel de Gestão
+              </h1>
+              <p className="text-lg text-gray-500 mt-1">
+                Bem-vindo, <span className="font-bold text-blue-600">{user.name}</span>!
+              </p>
+            </div>
           </div>
-          {/* Usamos o seu componente importado aqui */}
           <LogoutButton />
         </header>
 
