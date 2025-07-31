@@ -28,9 +28,9 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24, // 24 horas
       path: '/',
     });
-
+    
     // 4. Retorna uma resposta de sucesso para o formulário de login
-    return NextResponse.json({ message: 'Login bem-sucedido' });
+    return NextResponse.json({ message: 'Login bem-sucedido', token: access_token }, { status: 200 });
 
   } catch (error) {
     console.error("Erro na API de login:", error);

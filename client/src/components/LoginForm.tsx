@@ -30,7 +30,9 @@ export function LoginForm() {
         const data = await response.json();
         throw new Error(data.message || 'Falha no login. Verifique as suas credenciais.');
       }
-
+      const data = await response.json();
+      const token = data['token'];
+      localStorage.setItem('token', token);
       // Se o login for bem-sucedido, redireciona para o dashboard.
       router.push('/dashboard');
 

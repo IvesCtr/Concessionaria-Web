@@ -7,7 +7,7 @@ import { PlusCircle, Edit, Trash2, Save, XCircle } from 'lucide-react';
 import { ClientFormModal } from './ClientFormModal'; // Importa o novo modal
 
 export function ClientsList() {
-  const { token } = useAuth();
+  const token = localStorage.getItem('token') ? localStorage.getItem('token') : null;
   const [clients, setClients] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
