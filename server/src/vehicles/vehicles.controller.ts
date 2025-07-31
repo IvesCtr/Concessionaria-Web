@@ -8,12 +8,14 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards, // Garanta que UseGuards está importado
+  UseGuards,
+  ValidationPipe, // Garanta que UseGuards está importado
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport'; // E o AuthGuard também
 import { VehiclesService } from './vehicles.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('vehicles')
 // A LINHA DE PROTEÇÃO FOI REMOVIDA DAQUI
@@ -21,8 +23,8 @@ export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
   @Post()
-  @UseGuards(AuthGuard()) // PROTEGIDO: Apenas usuários logados podem criar
-  create(@Body() createVehicleDto: CreateVehicleDto) {
+  @UseGuards(JwtAuthGuard) 
+  create(@Body(ValidationPipe) createVehicleDto: CreateVehicleDto) {
     return this.vehiclesService.create(createVehicleDto);
   }
 
@@ -39,13 +41,13 @@ export class VehiclesController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard()) // PROTEGIDO: Apenas usuários logados podem editar
-  update(@Param('id') id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
+  @UseGuards(JwtAuthGuard) // PROTEGIDO: Apenas usuários logados podem editar
+  update(@Param('id') id: string, @Body(ValidationPipe) updateVehicleDto: UpdateVehicleDto) {
     return this.vehiclesService.update(id, updateVehicleDto);
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard()) // PROTEGIDO: Apenas usuários logados podem deletar
+  @UseGuards(JwtAuthGuard) // PROTEGIDO: Apenas usuários logados podem deletar
   remove(@Param('id') id: string) {
     return this.vehiclesService.remove(id);
   }
