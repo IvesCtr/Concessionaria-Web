@@ -104,7 +104,7 @@ export function VehiclesList() {
     if (!token) return;
     try {
       const response = await fetch(`http://localhost:7654/vehicles/${vehicleId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(editFormData),
       });
@@ -162,6 +162,12 @@ export function VehiclesList() {
                   </button>
                 </th>
                 <th
+                  onClick={() => requestSort('id')}
+                  className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider"
+                >
+                  ID
+                </th>
+                <th
                   onClick={() => requestSort('marca')}
                   className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider"
                 >
@@ -201,6 +207,13 @@ export function VehiclesList() {
                   <td className="text-center"></td>
                   {editingVehicleId === vehicle.id ? (
                     <>
+                      <td className="px-6 py-4 text-center">
+                        <input
+                          value={editFormData.id}
+                          onChange={(e) => setEditFormData({ ...editFormData, id: e.target.value })}
+                          className="w-full p-1 border rounded text-gray-700 text-center"
+                        />
+                      </td>
                       <td className="px-6 py-4 text-center">
                         <input
                           value={editFormData.marca}
@@ -252,6 +265,7 @@ export function VehiclesList() {
                     </>
                   ) : (
                     <>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">{vehicle.id}</td>
                       <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">{vehicle.marca}</td>
                       <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{vehicle.modelo}</td>
                       <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{vehicle.ano}</td>
@@ -265,7 +279,7 @@ export function VehiclesList() {
                           {vehicle.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 max-w-xs truncate text-center text-sm text-blue-600 underline">
+                      <td className="px-6 py-4 max-w-[200px] truncate text-center text-sm text-blue-600 underline">
                         <a
                           href={vehicle.imagemUrl}
                           target="_blank"
