@@ -59,7 +59,7 @@ export function EmployeeFormModal({ isOpen, onClose, onSave }: EmployeeFormModal
           </div>
           <div>
             <label htmlFor="cpf" className="block text-sm font-medium text-gray-700">CPF (11 dígitos, sem pontos)</label>
-            <input id="cpf" type="text" value={cpf} onChange={(e) => setCpf(e.target.value)} className="mt-1 w-full p-2 border rounded-md text-gray-700" required maxLength={11}  />
+            <input id="cpf" type="text" value={cpf} onChange={(e) => setCpf(e.target.value)} className="mt-1 w-full p-2 border rounded-md text-gray-700" required maxLength={11} />
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">Senha Provisória</label>

@@ -37,10 +37,10 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
   }
   
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  const isAvailable = vehicle.status === 'disponivel';
 
   return (
     <main className="bg-gray-100 min-h-screen">
-      {/* 1. Container principal agora é mais largo */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-8 text-lg">
           <ArrowLeft size={22} />
@@ -48,12 +48,9 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
         </Link>
 
         <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-          {/* 2. Layout dividido em 12 colunas para mais controle */}
           <div className="grid grid-cols-1 lg:grid-cols-12">
-            {/* Lado da Imagem (ocupando 7 de 12 colunas em telas grandes) */}
             <div className="lg:col-span-7 relative w-full h-96 lg:h-auto min-h-[400px]">
               <Image
-                // Usamos o placeholder se a imagemUrl não existir
                 src={vehicle.imagemUrl}
                 alt={`${vehicle.marca} ${vehicle.modelo}`}
                 fill
@@ -62,7 +59,6 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
               />
             </div>
 
-            {/* Lado das Informações (ocupando 5 de 12 colunas) */}
             <div className="lg:col-span-5 p-10 md:p-12 flex flex-col">
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">{vehicle.marca} {vehicle.modelo}</h1>
               
@@ -80,22 +76,36 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
                   <span>Cor: <strong>{vehicle.cor}</strong></span>
                 </div>
                 <div className="col-span-2 flex items-center gap-3">
-                  {vehicle.status === 'disponivel' ? 
+                  {isAvailable ? 
                     <CheckCircle size={22} className="text-green-500" /> : 
                     <XCircle size={22} className="text-red-500" />
                   }
-                  <span className={`font-semibold ${vehicle.status === 'disponivel' ? 'text-green-600' : 'text-red-600'}`}>
-                    {vehicle.status.charAt(0).toUpperCase() + vehicle.status.slice(1)}
+                  <span className={`font-semibold ${isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                    {isAvailable ? 'Disponível' : 'Vendido'}
                   </span>
                 </div>
               </div>
 
-              {/* Usamos flex-grow para empurrar o botão para o final */}
               <div className="border-t pt-8 mt-auto flex-grow flex flex-col">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Interessado neste veículo?</h2>
-                <p className="text-gray-600 mb-6">Entre em contato com um de nossos vendedores para mais informações e para agendar um test-drive.</p>
-                <button className="w-full mt-auto bg-green-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-green-700 transition-colors text-lg">
-                  Tenho Interesse!
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  {isAvailable ? "Interessado neste veículo?" : "Este veículo já foi vendido"}
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  {isAvailable 
+                    ? "Entre em contato com um de nossos vendedores para mais informações e para agendar um test-drive."
+                    : "Mas não se preocupe, temos outras ótimas opções em nosso catálogo esperando por você!"
+                  }
+                </p>
+                {/* Lógica condicional para o botão */}
+                <button 
+                  disabled={!isAvailable}
+                  className={`w-full mt-auto font-bold py-4 px-6 rounded-lg transition-colors text-lg ${
+                    isAvailable 
+                      ? 'bg-green-600 text-white hover:bg-green-700' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  {isAvailable ? 'Tenho Interesse!' : 'Vendido'}
                 </button>
               </div>
             </div>
