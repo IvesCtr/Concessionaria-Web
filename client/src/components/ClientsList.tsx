@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, use } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { User } from '@/types';
 import { PlusCircle, Edit, Trash2, Save, XCircle } from 'lucide-react';
-import { ClientFormModal } from './ClientFormModal'; // Importa o novo modal
+import { ClientFormModal } from './ClientFormModal';
 
 export function ClientsList() {
   const { token } = useAuth();
@@ -12,20 +12,21 @@ export function ClientsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados para as novas funcionalidades
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClientId, setEditingClientId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<User>>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof User; direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
 
-  // Busca inicial dos dados
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   useEffect(() => {
     if (!token) {
       setLoading(false);
       return;
-    };
-    
+    }
+
     const fetchClients = async () => {
       setLoading(true);
       setError(null);
@@ -45,7 +46,10 @@ export function ClientsList() {
     fetchClients();
   }, [token]);
 
-  // Lógica de Pesquisa e Ordenação
+  useEffect(() => {
+    setCurrentPage(1); // Volta pra página 1 ao buscar
+  }, [searchTerm]);
+
   const filteredAndSortedClients = useMemo(() => {
     let sortedClients = [...clients];
 
@@ -70,6 +74,14 @@ export function ClientsList() {
     );
   }, [clients, searchTerm, sortConfig]);
 
+  const paginatedClients = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredAndSortedClients.slice(startIndex, endIndex);
+  }, [filteredAndSortedClients, currentPage]);
+
+  const totalPages = Math.ceil(filteredAndSortedClients.length / itemsPerPage);
+
   const requestSort = (key: keyof User) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -78,10 +90,9 @@ export function ClientsList() {
     setSortConfig({ key, direction });
   };
 
-  // Funções de CRUD
   const handleSaveNewClient = async (newClientData: Omit<User, 'id' | 'role'>) => {
     if (!token) throw new Error("Autenticação necessária.");
-    
+
     const response = await fetch('http://localhost:7654/clientes', {
       method: 'POST',
       headers: {
@@ -123,10 +134,10 @@ export function ClientsList() {
       });
 
       if (!response.ok) throw new Error('Falha ao atualizar o cliente.');
-      
+
       const updatedClient: User = await response.json();
       setClients(clients.map(c => c.id === clientId ? updatedClient : c));
-      handleCancelEdit(); // Sai do modo de edição
+      handleCancelEdit();
     } catch (err: any) {
       setError(err.message);
     }
@@ -156,24 +167,23 @@ export function ClientsList() {
 
   return (
     <>
-      <ClientFormModal 
+      <ClientFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveNewClient}
       />
+
       <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-        {/* Barra de Pesquisa e Ordenação */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 text-gray-700">
-          <input 
-            type="text" 
-            placeholder="Pesquisar por nome, CPF ou email..." 
+          <input
+            type="text"
+            placeholder="Pesquisar por nome, CPF ou email..."
             className="w-full p-2 border rounded-md"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        {/* Tabela de Clientes */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-blue-100 text-white">
@@ -190,9 +200,9 @@ export function ClientsList() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAndSortedClients.map((client) => (
+              {paginatedClients.map((client) => (
                 <tr key={client.id} className="hover:bg-gray-50">
-                  <td className="py-4 whitespace-nowrap "></td>
+                  <td className="py-4 whitespace-nowrap"></td>
                   {editingClientId === client.id ? (
                     <>
                       <td className="px-6 py-4"><input value={editFormData.name} onChange={(e) => setEditFormData({...editFormData, name: e.target.value})} className="w-full p-2 border rounded-md text-gray-700" /></td>
@@ -224,6 +234,36 @@ export function ClientsList() {
             </tbody>
           </table>
         </div>
+
+        {/* Paginação */}
+        <div className="flex justify-center mt-6 space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &lt;
+          </button>
+
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            >
+              {index + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &gt;
+          </button>
+        </div>
+
       </div>
     </>
   );
