@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-// Esta função é acionada por uma requisição GET para /api/logout
 export async function GET() {
   try {
-    // Apaga o cookie de autenticação
+
     (await cookies()).delete('authToken');
 
     return NextResponse.json({ message: 'Logout bem-sucedido' }, { status: 200 });

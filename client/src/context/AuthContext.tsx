@@ -1,4 +1,3 @@
-// client/src/context/AuthContext.tsx
 "use client";
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
@@ -7,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 
 interface User {
   email: string;
-  sub: string; // ID do usuário
+  sub: string;
   role: string;
 }
 
@@ -48,9 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('token', accessToken);
     setUser(decodedUser);
     setToken(accessToken);
-    // REMOVEMOS O REDIRECIONAMENTO DAQUI.
-    // A página de Login agora será responsável por redirecionar
-    // ao perceber que o estado 'user' mudou.
   };
 
   const logout = () => {

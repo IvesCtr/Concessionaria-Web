@@ -47,7 +47,7 @@ export function ClientsList() {
   }, [token]);
 
   useEffect(() => {
-    setCurrentPage(1); // Volta pra página 1 ao buscar
+    setCurrentPage(1);
   }, [searchTerm]);
 
   const filteredAndSortedClients = useMemo(() => {

@@ -2,10 +2,9 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Passo 1: Importar o useRouter
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
-// Interfaces para os dados que vamos buscar
 interface VehicleDetails {
   modelo: string;
   cor: string;
@@ -15,35 +14,33 @@ interface ClientDetails {
 }
 
 export function SalesForm() {
-  const router = useRouter(); // Passo 2: Instanciar o router
+  const router = useRouter();
   const { token } = useAuth();
 
-  // --- Estados para os dados do formulário ---
+  //Estados para os dados do formulário
   const [vehicleId, setVehicleId] = useState('');
   const [clienteCpf, setClienteCpf] = useState('');
   const [funcionarioCpf, setFuncionarioCpf] = useState('');
   const [finalPrice, setFinalPrice] = useState('');
   const [observacoes, setObservacoes] = useState('');
 
-  // --- Estados para os dados de exibição ---
+  //Estados para os dados de exibição
   const [clientName, setClientName] = useState('');
   const [vehicleDetails, setVehicleDetails] = useState<VehicleDetails | null>(null);
   const saleDate = new Date().toLocaleDateString('pt-BR');
 
-  // --- Estados de controle ---
+  //Estados de controle
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Nova função para lidar com a entrada de CPF, permitindo apenas números
   const handleCpfChange = (value: string, setter: (value: string) => void) => {
-    const onlyNums = value.replace(/[^\d]/g, ''); // Remove tudo que não é dígito
+    const onlyNums = value.replace(/[^\d]/g, '');
     if (onlyNums.length <= 11) {
       setter(onlyNums);
     }
   };
 
-  // Lógica para buscar o nome do cliente quando o CPF perde o foco
   const handleClientCpfBlur = async () => {
     if (clienteCpf.length !== 11) {
       setClientName('');
@@ -65,7 +62,6 @@ export function SalesForm() {
     }
   };
 
-  // Lógica para buscar os detalhes do veículo quando o ID perde o foco
   const handleVehicleIdBlur = async () => {
     if (!vehicleId) {
       setVehicleDetails(null);
@@ -113,7 +109,6 @@ export function SalesForm() {
       }
 
       setSuccess('Venda registrada com sucesso!');
-      // Limpa todos os campos
       setVehicleId(''); setClienteCpf(''); setFuncionarioCpf(''); setFinalPrice(''); setObservacoes(''); setClientName(''); setVehicleDetails(null);
     } catch (err: any) {
       setError(err.message);

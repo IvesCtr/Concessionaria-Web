@@ -1,11 +1,9 @@
-// client/src/app/dashboard/clientes/page.tsx
 import Link from 'next/link';
 import { LayoutDashboard } from 'lucide-react';
 import { ClientsList } from "@/components/ClientsList";
 
 export default function ClientesPage() {
   return (
-    // <PrivateRoute allowedRoles={['FUNCIONARIO', 'GERENTE']}> // LINHA COMENTADA
       <div className="bg-gray-100 min-h-screen p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
           <header className="mb-8 flex justify-between items-center">
@@ -23,6 +21,5 @@ export default function ClientesPage() {
           </main>
         </div>
       </div>
-    // </PrivateRoute> // LINHA COMENTADA
   );
 }

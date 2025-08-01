@@ -18,8 +18,6 @@ export default function LoginPage() {
             priority
           />
         </div>
-
-        {/* Lado do Formulário */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12">
           <LoginForm />
         </div>

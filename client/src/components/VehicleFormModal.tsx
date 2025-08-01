@@ -1,10 +1,8 @@
-// client/src/components/VehicleFormModal.tsx
 "use client";
 
 import { useState } from 'react';
 import { Vehicle } from '@/types';
 
-// Tipo para os dados de criação de um novo veículo
 export type NewVehiclePayload = Omit<Vehicle, 'id'>;
 
 interface VehicleFormModalProps {
@@ -33,7 +31,6 @@ export function VehicleFormModal({ isOpen, onClose, onSave }: VehicleFormModalPr
 
     try {
       await onSave({ marca, modelo, ano, cor, preco, imagemUrl, status });
-      // Limpa o formulário
       setMarca(''); setModelo(''); setAno(''); setCor(''); setPreco(''); setImagemUrl(''); setStatus('disponivel');
       onClose();
     } catch (err: any) {

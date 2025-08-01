@@ -2,15 +2,11 @@ import VehicleCard from '@/components/VehicleCard';
 import { Vehicle } from '@/types';
 import Link from 'next/link';
 
-// Função para buscar os dados da sua API backend
-// O Next.js gerencia o cache desta função automaticamente
 async function getVehicles(): Promise<Vehicle[]> {
   try {
-    // IMPORTANTE: Substitua a URL pela URL do seu backend.
-    // Se estiver rodando localmente, pode ser 'http://localhost:3001'
     const response = await fetch('http://localhost:7654/vehicles', {
       next: {
-        revalidate: 60, // Opcional: Revalida os dados a cada 60 segundos
+        revalidate: 60,
       },
     });
 
@@ -21,7 +17,7 @@ async function getVehicles(): Promise<Vehicle[]> {
     return response.json();
   } catch (error) {
     console.error(error);
-    return []; // Retorna um array vazio em caso de erro
+    return [];
   }
 }
 
@@ -32,10 +28,8 @@ console.log('Dados recebidos do backend:', vehicles);
 
   return (
     <main className="bg-gray-50 min-h-screen">
-      {/* Aqui podemos adicionar o Header e a Barra de Busca no futuro */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          {/* A classe mb-6 foi removida daqui */}
           <h1 className="text-3xl font-bold text-gray-800">Veículos em Destaque</h1>
           
           <Link 

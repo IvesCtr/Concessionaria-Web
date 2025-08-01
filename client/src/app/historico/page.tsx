@@ -1,9 +1,7 @@
-// client/src/app/dashboard/historico/page.tsx
 import Link from 'next/link';
 import { LayoutDashboard } from 'lucide-react';
 import { SalesHistoryList } from "@/components/SalesHistoryList";
 
-// Deixamos a página sem a lógica de proteção para facilitar o desenvolvimento
 export default function HistoricoVendasPage() {
   return (
     <div className="bg-gray-100 min-h-screen p-4 sm:p-8">

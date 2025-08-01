@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { Vehicle } from '@/types';
 import { ArrowLeft, Calendar, Palette, CheckCircle, XCircle } from 'lucide-react';
 
-// A função getVehicleDetails permanece a mesma
 async function getVehicleDetails(id: string): Promise<Vehicle | null> {
   try {
     const response = await fetch(`http://localhost:7654/vehicles/${id}`, {

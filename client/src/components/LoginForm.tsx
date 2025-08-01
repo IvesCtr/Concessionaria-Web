@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export function LoginForm() {
   const router = useRouter();
-  // ALTERAÇÃO AQUI: O estado inicial agora é uma string vazia.
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -17,15 +17,13 @@ export function LoginForm() {
     setError(null);
 
     try {
-      // Chama a nossa API Route do Next.js, que lida com a
-      // autenticação no backend e a criação do cookie.
+      //Chama a nossa API Route do Next.js, que lida com a autenticação no backend e a criação do cookie.
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
-      // Se a resposta não for 'ok', o login falhou.
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || 'Falha no login. Verifique as suas credenciais.');
@@ -33,7 +31,6 @@ export function LoginForm() {
       const data = await response.json();
       const token = data['token'];
       localStorage.setItem('token', token);
-      // Se o login for bem-sucedido, redireciona para o dashboard.
       router.push('/dashboard');
 
     } catch (err: any) {
@@ -43,7 +40,6 @@ export function LoginForm() {
     }
   };
 
-  // O JSX abaixo é o seu layout original, sem alterações visuais.
   return (
       <div className="bg-white rounded-2xl p-10 w-full max-w-md transition-all">
         <h1 className="text-3xl font-semibold text-center text-gray-800 mb-6">Bem-vindo!👋</h1>

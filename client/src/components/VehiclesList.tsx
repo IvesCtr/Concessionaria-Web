@@ -1,4 +1,3 @@
-// client/src/components/VehiclesList.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -41,7 +40,7 @@ export function VehiclesList() {
   }, []);
 
   useEffect(() => {
-    setCurrentPage(1); // Reseta para a primeira página ao buscar
+    setCurrentPage(1);
   }, [searchTerm]);
 
   const filteredAndSortedVehicles = useMemo(() => {

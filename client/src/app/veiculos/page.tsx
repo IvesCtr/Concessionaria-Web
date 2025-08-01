@@ -1,10 +1,7 @@
-// client/src/app/dashboard/veiculos/page.tsx
 import Link from 'next/link';
 import { LayoutDashboard } from 'lucide-react';
 import { VehiclesList } from "@/components/VehiclesList";
 
-// Página aberta para desenvolvimento.
-// No futuro, podemos adicionar a lógica de proteção como nas outras páginas.
 export default function VeiculosPage() {
   return (
     <div className="bg-gray-100 min-h-screen p-4 sm:p-8">
