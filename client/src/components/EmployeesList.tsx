@@ -18,6 +18,9 @@ export function EmployeesList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof User; direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   useEffect(() => {
     if (!token) { setLoading(false); return; }
     
@@ -40,6 +43,10 @@ export function EmployeesList() {
     fetchEmployees();
   }, [token]);
 
+  useEffect(() => {
+    setCurrentPage(1); // Volta pra página 1 ao buscar
+  }, [searchTerm]);
+
   const filteredAndSortedEmployees = useMemo(() => {
     let sortedEmployees = [...employees];
     if (sortConfig.key) {
@@ -58,6 +65,14 @@ export function EmployeesList() {
       emp.cpf.includes(searchTerm)
     );
   }, [employees, searchTerm, sortConfig]);
+
+  const paginatedEmployees = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredAndSortedEmployees.slice(start, end);
+  }, [filteredAndSortedEmployees, currentPage]);
+
+  const totalPages = Math.ceil(filteredAndSortedEmployees.length / itemsPerPage);
 
   const requestSort = (key: keyof User) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -168,7 +183,7 @@ export function EmployeesList() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAndSortedEmployees.map((employee) => (
+              {paginatedEmployees.map((employee) => (
                 <tr key={employee.id} className="hover:bg-gray-50">
                   <td className="py-4 whitespace-nowrap"></td>
                   {editingEmployeeId === employee.id ? (
@@ -209,6 +224,36 @@ export function EmployeesList() {
             </tbody>
           </table>
         </div>
+
+        {/* Paginação */}
+        <div className="flex justify-center mt-6 space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &lt;
+          </button>
+
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            >
+              {index + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &gt;
+          </button>
+        </div>
+
       </div>
     </>
   );

@@ -1,32 +1,43 @@
 // client/src/components/SalesHistoryList.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Sale } from '@/types';
 import { DollarSign } from 'lucide-react';
 
 export function SalesHistoryList() {
-  // Usamos o token para o caso de reativarmos a segurança no futuro
   const { token } = useAuth();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Sale | 'cliente' | 'vendedor'; direction: 'asc' | 'desc' }>({
+    key: 'saleDate',
+    direction: 'desc',
+  });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      setError('Token de autenticação não encontrado. Faça o login novamente.');
+      return;
+    }
+
     const fetchSalesHistory = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await fetch('http://localhost:7654/historico', {
-          headers: {
-            // A autorização é necessária pois a rota no backend é protegida
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: { 'Authorization': `Bearer ${token}` },
         });
 
         if (!response.ok) {
-          throw new Error('Falha ao buscar o histórico de vendas. Verifique se está logado.');
+          throw new Error('Falha ao buscar o histórico de vendas. Verifique suas permissões.');
         }
 
         const data: Sale[] = await response.json();
@@ -38,81 +49,108 @@ export function SalesHistoryList() {
       }
     };
 
-    // Mesmo com a página pública, a chamada à API pode precisar de um token.
-    // Se não houver token, a chamada falhará graciosamente.
     fetchSalesHistory();
   }, [token]);
 
-  // Funções de formatação para exibição
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const filteredAndSortedSales = useMemo(() => {
+    let filteredSales = sales.filter((sale) =>
+      sale.cliente.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sale.funcionario.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sale.id.slice(-6).toUpperCase().includes(searchTerm.toUpperCase())
+    );
+
+    if (sortConfig.key) {
+      filteredSales.sort((a, b) => {
+        let valA: any, valB: any;
+        if (sortConfig.key === 'cliente') {
+          valA = a.cliente.name;
+          valB = b.cliente.name;
+        } else if (sortConfig.key === 'vendedor') {
+          valA = a.funcionario.name;
+          valB = b.funcionario.name;
+        } else {
+          valA = a[sortConfig.key as keyof Sale];
+          valB = b[sortConfig.key as keyof Sale];
+        }
+
+        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filteredSales;
+  }, [sales, searchTerm, sortConfig]);
+
+  const paginatedSales = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredAndSortedSales.slice(startIndex, endIndex);
+  }, [filteredAndSortedSales, currentPage]);
+
+  const totalPages = Math.ceil(filteredAndSortedSales.length / itemsPerPage);
+
+  const totalRevenue = useMemo(() => {
+    return filteredAndSortedSales.reduce((total, sale) => total + sale.finalPrice, 0);
+  }, [filteredAndSortedSales]);
+
+  const requestSort = (key: keyof Sale | 'cliente' | 'vendedor') => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-  // Lógica de comissão de exemplo (5% do valor da venda)
-  const calculateCommission = (value: number) => {
-    return formatCurrency(value * 0.05); 
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
+  const calculateCommission = (value: number) => formatCurrency(value * 0.05);
 
-  if (loading) {
-    return <p className="text-center text-gray-500 py-10">Carregando histórico...</p>;
-  }
-
-  if (error) {
-    return <p className="text-center text-red-500 py-10">Erro: {error}</p>;
-  }
+  if (loading) return <p className="text-center text-gray-500 py-10">Carregando histórico...</p>;
+  if (error) return <p className="text-center text-red-500 py-10">Erro: {error}</p>;
 
   return (
     <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-      {/* Filtros e Caixa (Desabilitados na Fase 1) */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
         <div className="lg:col-span-1 bg-green-100 text-green-800 p-6 rounded-lg flex flex-col items-center justify-center">
           <DollarSign size={40} className="mb-2" />
-          <span className="text-3xl font-bold">{formatCurrency(1500)}</span>
-          <span className="text-sm">Caixa (Exemplo)</span>
+          <span className="text-3xl font-bold">{formatCurrency(totalRevenue)}</span>
+          <span className="text-sm">Caixa (Vendas Filtradas)</span>
         </div>
-        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+        <div className="lg:col-span-3 grid grid-cols-1 items-end">
           <div>
-            <label className="text-sm font-medium text-gray-600">Pesquisar</label>
-            <input type="text" placeholder="ID, Cliente..." className="mt-1 w-full p-2 border rounded-md bg-gray-200 cursor-not-allowed" disabled />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-600">Período</label>
-            <input type="text" placeholder="dd/mm/yyyy - dd/mm/yyyy" className="mt-1 w-full p-2 border rounded-md bg-gray-200 cursor-not-allowed" disabled />
-          </div>
-           <div>
-            <label className="text-sm font-medium text-gray-600">Valor</label>
-            <input type="text" placeholder="R$ - R$" className="mt-1 w-full p-2 border rounded-md bg-gray-200 cursor-not-allowed" disabled />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-600">Vendedor</label>
-            <select className="mt-1 w-full p-2 border rounded-md bg-gray-200 cursor-not-allowed" disabled><option>Todos</option></select>
-          </div>
-           <div>
-            <label className="text-sm font-medium text-gray-600">Ordenar por</label>
-            <select className="mt-1 w-full p-2 border rounded-md bg-gray-200 cursor-not-allowed" disabled><option>Data</option></select>
+            <label htmlFor="search" className="text-sm font-medium text-gray-600">Pesquisar por Cliente, Vendedor ou ID</label>
+            <input
+              id="search"
+              type="text"
+              placeholder="Digite para pesquisar..."
+              className="mt-1 w-full p-2 border rounded-md text-gray-700"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
       </div>
 
-      {/* Tabela de Histórico */}
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead className="bg-gray-800 text-white">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Id Venda</th>
+              <th onClick={() => requestSort('id')} className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Id Venda</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Comissão</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Valor</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Data</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Cliente</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Vendedor</th>
+              <th onClick={() => requestSort('finalPrice')} className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Valor</th>
+              <th onClick={() => requestSort('saleDate')} className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Data</th>
+              <th onClick={() => requestSort('cliente')} className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Cliente</th>
+              <th onClick={() => requestSort('vendedor')} className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Vendedor</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {sales.length > 0 ? sales.map((sale) => (
+            {paginatedSales.length > 0 ? paginatedSales.map((sale) => (
               <tr key={sale.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{sale.id.slice(-6).toUpperCase()}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{calculateCommission(sale.finalPrice)}</td>
@@ -123,17 +161,40 @@ export function SalesHistoryList() {
               </tr>
             )) : (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-500">Nenhuma venda encontrada.</td>
+                <td colSpan={6} className="text-center py-10 text-gray-500">Nenhuma venda encontrada para os filtros aplicados.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      
-      {/* Paginação (Fase 2) */}
-      <div className="flex items-center justify-center border-t border-gray-200 px-4 py-3 sm:px-6 mt-4">
-        <p className="text-sm text-gray-500">Paginação será implementada na Fase 2</p>
-      </div>
+
+        <div className="flex justify-center mt-6 space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &lt;
+          </button>
+
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            >
+              {index + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &gt;
+          </button>
+        </div>
     </div>
   );
 }
