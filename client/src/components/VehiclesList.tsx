@@ -162,12 +162,12 @@ export function VehiclesList() {
                   <td></td>
                   {editingVehicleId === vehicle.id ? (
                     <>
-                      <td className="px-6 py-4"><input value={editFormData.marca} onChange={(e) => setEditFormData({...editFormData, marca: e.target.value})} className="w-full p-1 border rounded" /></td>
-                      <td className="px-6 py-4"><input value={editFormData.modelo} onChange={(e) => setEditFormData({...editFormData, modelo: e.target.value})} className="w-full p-1 border rounded" /></td>
-                      <td className="px-6 py-4"><input type="number" value={editFormData.ano} onChange={(e) => setEditFormData({...editFormData, ano: Number(e.target.value)})} className="w-full p-1 border rounded" /></td>
-                      <td className="px-6 py-4"><input type="number" value={editFormData.preco} onChange={(e) => setEditFormData({...editFormData, preco: Number(e.target.value)})} className="w-full p-1 border rounded" /></td>
+                      <td className="px-6 py-4"><input value={editFormData.marca} onChange={(e) => setEditFormData({...editFormData, marca: e.target.value})} className="w-full p-1 border rounded text-gray-700" /></td>
+                      <td className="px-6 py-4"><input value={editFormData.modelo} onChange={(e) => setEditFormData({...editFormData, modelo: e.target.value})} className="w-full p-1 border rounded text-gray-700" /></td>
+                      <td className="px-6 py-4"><input type="number" value={editFormData.ano} onChange={(e) => setEditFormData({...editFormData, ano: Number(e.target.value)})} className="w-full p-1 border rounded text-gray-700" /></td>
+                      <td className="px-6 py-4"><input type="number" value={editFormData.preco} onChange={(e) => setEditFormData({...editFormData, preco: Number(e.target.value)})} className="w-full p-1 border rounded text-gray-700" /></td>
                       <td className="px-6 py-4">
-                        <select value={editFormData.status} onChange={(e) => setEditFormData({...editFormData, status: e.target.value as 'disponivel' | 'vendido'})} className="w-full p-1 border rounded">
+                        <select value={editFormData.status} onChange={(e) => setEditFormData({...editFormData, status: e.target.value as 'disponivel' | 'vendido'})} className="w-full p-1 border rounded text-gray-700">
                           <option value="disponivel">Disponível</option>
                           <option value="vendido">Vendido</option>
                         </select>

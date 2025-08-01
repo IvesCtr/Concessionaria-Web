@@ -8,6 +8,7 @@ export type Vehicle = {
   ano: number;
   cor: string;
   preco: number;
+  imagemUrl: string;
   status: 'disponivel' | 'vendido';
 };
 

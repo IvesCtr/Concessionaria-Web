@@ -31,6 +31,9 @@ export class Vehicle {
 
   @Prop({ required: true })
   preco: number;
+
+  @Prop({ required: true })
+  imagemUrl: string;
   
   @Prop({ type: String, required: true, enum: VehicleStatus, default: VehicleStatus.DISPONIVEL })
   status: VehicleStatus;

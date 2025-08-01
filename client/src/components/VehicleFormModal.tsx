@@ -19,6 +19,7 @@ export function VehicleFormModal({ isOpen, onClose, onSave }: VehicleFormModalPr
   const [ano, setAno] = useState<number | ''>('');
   const [cor, setCor] = useState('');
   const [preco, setPreco] = useState<number | ''>('');
+  const [imagemUrl, setImagemUrl] = useState('');
   const [status, setStatus] = useState<'disponivel' | 'vendido'>('disponivel');
   
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +32,9 @@ export function VehicleFormModal({ isOpen, onClose, onSave }: VehicleFormModalPr
     setError(null);
 
     try {
-      await onSave({ marca, modelo, ano, cor, preco, status });
+      await onSave({ marca, modelo, ano, cor, preco, imagemUrl, status });
       // Limpa o formulário
-      setMarca(''); setModelo(''); setAno(''); setCor(''); setPreco(''); setStatus('disponivel');
+      setMarca(''); setModelo(''); setAno(''); setCor(''); setPreco(''); setImagemUrl(''); setStatus('disponivel');
       onClose();
     } catch (err: any) {
       setError(err.message || 'Falha ao criar o veículo.');
@@ -69,6 +70,10 @@ export function VehicleFormModal({ isOpen, onClose, onSave }: VehicleFormModalPr
             <div className="md:col-span-2">
               <label htmlFor="preco" className="block text-sm font-medium text-gray-700">Preço (R$)</label>
               <input id="preco" type="number" value={preco} onChange={(e) => setPreco(Number(e.target.value))} className="mt-1 w-full p-2 border rounded-md text-gray-700" placeholder="Ex: 50000" required />
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="imagemUrl" className="block text-sm font-medium text-gray-700">URL da imagem</label>
+              <input id="imagemUrl" type="text" value={imagemUrl} onChange={(e) => setImagemUrl(e.target.value)} className="mt-1 w-full p-2 border rounded-md text-gray-700" required />
             </div>
           </div>
 
