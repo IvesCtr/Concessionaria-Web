@@ -23,7 +23,7 @@ export function EmployeesList() {
 
   useEffect(() => {
     if (!token) { setLoading(false); return; }
-    
+
     const fetchEmployees = async () => {
       setLoading(true);
       setError(null);
@@ -44,7 +44,7 @@ export function EmployeesList() {
   }, [token]);
 
   useEffect(() => {
-    setCurrentPage(1); // Volta pra página 1 ao buscar
+    setCurrentPage(1);
   }, [searchTerm]);
 
   const filteredAndSortedEmployees = useMemo(() => {
@@ -142,7 +142,7 @@ export function EmployeesList() {
     if (!cpf) return '';
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
-  
+
   const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
   if (loading) return <p className="text-center text-gray-500">A carregar equipa...</p>;
@@ -185,29 +185,29 @@ export function EmployeesList() {
             <tbody className="bg-white divide-y divide-gray-200">
               {paginatedEmployees.map((employee) => (
                 <tr key={employee.id} className="hover:bg-gray-50">
-                  <td className="py-4 whitespace-nowrap"></td>
+                  <td className="py-4 text-center whitespace-nowrap"></td>
                   {editingEmployeeId === employee.id ? (
                     <>
-                      <td className="px-6 py-4"><input value={editFormData.name} onChange={(e) => setEditFormData({...editFormData, name: e.target.value})} className="w-full p-2 border rounded-md text-gray-700 text-center" /></td>
-                      <td className="px-6 py-4">
-                        <select value={editFormData.role} onChange={(e) => setEditFormData({...editFormData, role: e.target.value as 'funcionario' | 'gerente'})} className="w-full p-2 border rounded-md text-gray-700 text-center">
+                      <td className="px-6 py-4 text-center"><input value={editFormData.name} onChange={(e) => setEditFormData({...editFormData, name: e.target.value})} className="w-full p-2 border rounded-md text-gray-700" /></td>
+                      <td className="px-6 py-4 text-center">
+                        <select value={editFormData.role} onChange={(e) => setEditFormData({...editFormData, role: e.target.value as 'funcionario' | 'gerente'})} className="w-full p-2 border rounded-md text-gray-700">
                           <option value="funcionario">Funcionário</option>
                           <option value="gerente">Gerente</option>
                         </select>
                       </td>
-                      <td className="px-6 py-4"><input value={editFormData.cpf} onChange={(e) => setEditFormData({...editFormData, cpf: e.target.value})} className="w-full p-2 border rounded-md text-gray-700 text-center" /></td>
-                      <td className="px-6 py-4"><input value={editFormData.email} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} className="w-full p-2 border rounded-md text-gray-700 text-center" /></td>
+                      <td className="px-6 py-4 text-center"><input value={editFormData.cpf} onChange={(e) => setEditFormData({...editFormData, cpf: e.target.value})} className="w-full p-2 border rounded-md text-gray-700" /></td>
+                      <td className="px-6 py-4 text-center"><input value={editFormData.email} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} className="w-full p-2 border rounded-md text-gray-700" /></td>
                     </>
                   ) : (
                     <>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{employee.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{capitalize(employee.role)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{formatCPF(employee.cpf)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{employee.email}</td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">{employee.name}</td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{capitalize(employee.role)}</td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{formatCPF(employee.cpf)}</td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{employee.email}</td>
                     </>
                   )}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center justify-center gap-4">
+                  <td className="px-6 py-4 text-center whitespace-nowrap">
+                    <div className="flex justify-center items-center gap-4">
                       {editingEmployeeId === employee.id ? (
                         <>
                           <button onClick={() => handleSaveEdit(employee.id)} className="text-green-600 hover:text-green-800"><Save size={20} /></button>
@@ -225,36 +225,33 @@ export function EmployeesList() {
           </table>
         </div>
 
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-6 space-x-2">
+        <div className="flex justify-center mt-6 space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &lt;
+          </button>
+
+          {[...Array(totalPages)].map((_, index) => (
             <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
             >
-              &lt;
+              {index + 1}
             </button>
+          ))}
 
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentPage(index + 1)}
-                className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-700 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-              >
-                {index + 1}
-              </button>
-            ))}
-
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-            >
-              &gt;
-            </button>
-          </div>
-        )}
-
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &gt;
+          </button>
+        </div>
       </div>
     </>
   );

@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Vehicle } from '@/types';
-import { PlusCircle, Edit, Trash2, Save, XCircle, ExternalLink } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Save, XCircle } from 'lucide-react';
 import { VehicleFormModal, NewVehiclePayload } from './VehicleFormModal';
 
 export function VehiclesList() {
@@ -39,7 +39,7 @@ export function VehiclesList() {
     };
     fetchVehicles();
   }, []);
-  
+
   useEffect(() => {
     setCurrentPage(1); // Reseta para a primeira página ao buscar
   }, [searchTerm]);
@@ -48,20 +48,17 @@ export function VehiclesList() {
     let sortedVehicles = [...vehicles];
     if (sortConfig.key) {
       sortedVehicles.sort((a, b) => {
-        const valA = a[sortConfig.key] as any;
-        const valB = b[sortConfig.key] as any;
+        const valA = a[sortConfig.key];
+        const valB = b[sortConfig.key];
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
       });
     }
     if (!searchTerm) return sortedVehicles;
-    
-    const lowercasedFilter = searchTerm.toLowerCase();
     return sortedVehicles.filter(v =>
-      v.marca.toLowerCase().includes(lowercasedFilter) ||
-      v.modelo.toLowerCase().includes(lowercasedFilter) ||
-      (v.imagemUrl && v.imagemUrl.toLowerCase().includes(lowercasedFilter))
+      v.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      v.modelo.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [vehicles, searchTerm, sortConfig]);
 
@@ -79,7 +76,7 @@ export function VehiclesList() {
 
   const handleSaveNewVehicle = async (newVehicleData: NewVehiclePayload) => {
     if (!token) throw new Error("Autenticação necessária para esta ação.");
-    
+
     const response = await fetch('http://localhost:7654/vehicles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -134,7 +131,7 @@ export function VehiclesList() {
       setError(err.message);
     }
   };
-  
+
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   if (loading) return <p className="text-center text-gray-500">Carregando catálogo...</p>;
@@ -142,35 +139,60 @@ export function VehiclesList() {
 
   return (
     <>
-      <VehicleFormModal 
+      <VehicleFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveNewVehicle}
       />
       <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-        <input 
-          type="text" 
-          placeholder="Pesquisar por marca, modelo ou URL..." 
+        <input
+          type="text"
+          placeholder="Pesquisar por marca ou modelo..."
           className="w-full p-2 border rounded-md mb-6 text-gray-700"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 table-fixed">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-blue-100">
               <tr>
-                <th className="w-16 text-center py-3 px-2">
+                <th className="w-20 text-center py-3">
                   <button onClick={() => setIsModalOpen(true)} className="text-gray-700 p-2 rounded-md hover:bg-blue-200">
                     <PlusCircle size={24} />
                   </button>
                 </th>
-                <th onClick={() => requestSort('marca')} className="w-1/6 text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Marca</th>
-                <th onClick={() => requestSort('modelo')} className="w-1/6 text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Modelo</th>
-                <th onClick={() => requestSort('ano')} className="w-24 text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Ano</th>
-                <th onClick={() => requestSort('preco')} className="w-1/6 text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Preço</th>
-                <th onClick={() => requestSort('status')} className="w-32 text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Status</th>
-                <th onClick={() => requestSort('imagemUrl')} className="w-1/4 text-gray-700 cursor-pointer px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Imagem URL</th>
-                <th className="w-28 text-gray-700 px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Ações</th>
+                <th
+                  onClick={() => requestSort('marca')}
+                  className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider"
+                >
+                  Marca
+                </th>
+                <th
+                  onClick={() => requestSort('modelo')}
+                  className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider"
+                >
+                  Modelo
+                </th>
+                <th
+                  onClick={() => requestSort('ano')}
+                  className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider"
+                >
+                  Ano
+                </th>
+                <th
+                  onClick={() => requestSort('preco')}
+                  className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider"
+                >
+                  Preço
+                </th>
+                <th
+                  onClick={() => requestSort('status')}
+                  className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider"
+                >
+                  Status
+                </th>
+                <th className="text-gray-700 px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Imagem</th>
+                <th className="text-gray-700 px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -179,50 +201,102 @@ export function VehiclesList() {
                   <td className="text-center"></td>
                   {editingVehicleId === vehicle.id ? (
                     <>
-                      <td className="px-2 py-4 text-center"><input value={editFormData.marca || ''} onChange={(e) => setEditFormData({...editFormData, marca: e.target.value})} className="w-full p-1 border rounded text-gray-700 text-center" /></td>
-                      <td className="px-2 py-4 text-center"><input value={editFormData.modelo || ''} onChange={(e) => setEditFormData({...editFormData, modelo: e.target.value})} className="w-full p-1 border rounded text-gray-700 text-center" /></td>
-                      <td className="px-2 py-4 text-center"><input type="number" value={editFormData.ano || ''} onChange={(e) => setEditFormData({...editFormData, ano: Number(e.target.value)})} className="w-full p-1 border rounded text-gray-700 text-center" /></td>
-                      <td className="px-2 py-4 text-center"><input type="number" value={editFormData.preco || ''} onChange={(e) => setEditFormData({...editFormData, preco: Number(e.target.value)})} className="w-full p-1 border rounded text-gray-700 text-center" /></td>
-                      <td className="px-2 py-4 text-center">
-                        <select value={editFormData.status} onChange={(e) => setEditFormData({...editFormData, status: e.target.value as 'disponivel' | 'vendido'})} className="w-full p-1 border rounded text-gray-700 text-center">
+                      <td className="px-6 py-4 text-center">
+                        <input
+                          value={editFormData.marca}
+                          onChange={(e) => setEditFormData({ ...editFormData, marca: e.target.value })}
+                          className="w-full p-1 border rounded text-gray-700 text-center"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <input
+                          value={editFormData.modelo}
+                          onChange={(e) => setEditFormData({ ...editFormData, modelo: e.target.value })}
+                          className="w-full p-1 border rounded text-gray-700 text-center"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <input
+                          type="number"
+                          value={editFormData.ano}
+                          onChange={(e) => setEditFormData({ ...editFormData, ano: Number(e.target.value) })}
+                          className="w-full p-1 border rounded text-gray-700 text-center"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <input
+                          type="number"
+                          value={editFormData.preco}
+                          onChange={(e) => setEditFormData({ ...editFormData, preco: Number(e.target.value) })}
+                          className="w-full p-1 border rounded text-gray-700 text-center"
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <select
+                          value={editFormData.status}
+                          onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value as 'disponivel' | 'vendido' })}
+                          className="w-full p-1 border rounded text-gray-700 text-center"
+                        >
                           <option value="disponivel">Disponível</option>
                           <option value="vendido">Vendido</option>
                         </select>
                       </td>
-                      <td className="px-2 py-4 text-left"><input value={editFormData.imagemUrl || ''} onChange={(e) => setEditFormData({...editFormData, imagemUrl: e.target.value})} className="w-full p-1 border rounded text-gray-700" /></td>
+                      <td className="px-6 py-4 text-center">
+                        <input
+                          value={editFormData.imagemUrl}
+                          onChange={(e) => setEditFormData({ ...editFormData, imagemUrl: e.target.value })}
+                          className="w-full p-1 border rounded text-gray-700 text-xs text-center"
+                          placeholder="https://..."
+                        />
+                      </td>
                     </>
                   ) : (
                     <>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{vehicle.marca}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{vehicle.modelo}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{vehicle.ano}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{formatCurrency(vehicle.preco)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${vehicle.status === 'disponivel' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">{vehicle.marca}</td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{vehicle.modelo}</td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{vehicle.ano}</td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{formatCurrency(vehicle.preco)}</td>
+                      <td className="px-6 py-4 text-center whitespace-nowrap text-sm">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            vehicle.status === 'disponivel' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}
+                        >
                           {vehicle.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 break-all text-left">
-                        {vehicle.imagemUrl && (
-                           <a href={vehicle.imagemUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
-                             <span>{vehicle.imagemUrl}</span>
-                             <ExternalLink size={14}/>
-                           </a>
-                        )}
+                      <td className="px-6 py-4 max-w-xs truncate text-center text-sm text-blue-600 underline">
+                        <a
+                          href={vehicle.imagemUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={vehicle.imagemUrl}
+                          className="block"
+                        >
+                          {vehicle.imagemUrl}
+                        </a>
                       </td>
                     </>
                   )}
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 text-center whitespace-nowrap">
                     <div className="flex items-center justify-center gap-4">
                       {editingVehicleId === vehicle.id ? (
                         <>
-                          <button onClick={() => handleSaveEdit(vehicle.id)} className="text-green-600 hover:text-green-800"><Save size={20} /></button>
-                          <button onClick={handleCancelEdit} className="text-gray-600 hover:text-gray-800"><XCircle size={20} /></button>
+                          <button onClick={() => handleSaveEdit(vehicle.id)} className="text-green-600 hover:text-green-800">
+                            <Save size={20} />
+                          </button>
+                          <button onClick={handleCancelEdit} className="text-gray-600 hover:text-gray-800">
+                            <XCircle size={20} />
+                          </button>
                         </>
                       ) : (
-                        <button onClick={() => handleEdit(vehicle)} className="text-blue-600 hover:text-blue-800"><Edit size={20} /></button>
+                        <button onClick={() => handleEdit(vehicle)} className="text-blue-600 hover:text-blue-800">
+                          <Edit size={20} />
+                        </button>
                       )}
-                      <button onClick={() => handleDelete(vehicle.id)} className="text-red-600 hover:text-red-800"><Trash2 size={20} /></button>
+                      <button onClick={() => handleDelete(vehicle.id)} className="text-red-600 hover:text-red-800">
+                        <Trash2 size={20} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -230,37 +304,35 @@ export function VehiclesList() {
             </tbody>
           </table>
         </div>
-        
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-6 space-x-2">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-            >
-              &lt;
-            </button>
 
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentPage(index + 1)}
-                className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-700 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-              >
-                {index + 1}
-              </button>
-            ))}
+        {/* Paginação */}
+        <div className="flex justify-center mt-6 space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &lt;
+          </button>
 
+          {[...Array(totalPages)].map((_, index) => (
             <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+              key={index}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
             >
-              &gt;
+              {index + 1}
             </button>
-          </div>
-        )}
-        
+          ))}
+
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+          >
+            &gt;
+          </button>
+        </div>
       </div>
     </>
   );

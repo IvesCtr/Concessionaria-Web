@@ -139,25 +139,25 @@ export function SalesHistoryList() {
 
       <div className="overflow-x-auto">
         <table className="min-w-full">
-          <thead className="bg-gray-800 text-white">
+          <thead className="bg-blue-100 text-white">
             <tr>
-              <th onClick={() => requestSort('id')} className="cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Id Venda</th>
-              <th className="px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Comissão</th>
-              <th onClick={() => requestSort('finalPrice')} className="cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Valor</th>
-              <th onClick={() => requestSort('saleDate')} className="cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Data</th>
-              <th onClick={() => requestSort('cliente')} className="cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Cliente</th>
-              <th onClick={() => requestSort('vendedor')} className="cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Vendedor</th>
+              <th onClick={() => requestSort('id')} className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Id Venda</th>
+              <th className="text-gray-700 px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Comissão</th>
+              <th onClick={() => requestSort('finalPrice')} className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Valor</th>
+              <th onClick={() => requestSort('saleDate')} className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Data</th>
+              <th onClick={() => requestSort('cliente')} className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Cliente</th>
+              <th onClick={() => requestSort('vendedor')} className="text-gray-700 cursor-pointer px-6 py-3 text-center text-xs font-bold uppercase tracking-wider">Vendedor</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {paginatedSales.length > 0 ? paginatedSales.map((sale) => (
               <tr key={sale.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{sale.id.slice(-6).toUpperCase()}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{calculateCommission(sale.finalPrice)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800 text-center">{formatCurrency(sale.finalPrice)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{formatDate(sale.saleDate)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{sale.cliente.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{sale.funcionario.name}</td>
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-medium text-gray-900">{sale.id.slice(-6).toUpperCase()}</td>
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{calculateCommission(sale.finalPrice)}</td>
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm font-bold text-gray-800">{formatCurrency(sale.finalPrice)}</td>
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{formatDate(sale.saleDate)}</td>
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{sale.cliente.name}</td>
+                <td className="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500">{sale.funcionario.name}</td>
               </tr>
             )) : (
               <tr>
@@ -168,35 +168,33 @@ export function SalesHistoryList() {
         </table>
       </div>
 
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-6 space-x-2">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-            >
-              &lt;
-            </button>
+      <div className="flex justify-center mt-6 space-x-2">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+        >
+          &lt;
+        </button>
 
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentPage(index + 1)}
-                className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-700 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-              >
-                {index + 1}
-              </button>
-            ))}
+        {[...Array(totalPages)].map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentPage(index + 1)}
+            className={`px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            {index + 1}
+          </button>
+        ))}
 
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-            >
-              &gt;
-            </button>
-          </div>
-        )}
+        <button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-blue-500 text-white'}`}
+        >
+          &gt;
+        </button>
+      </div>
     </div>
   );
 }
